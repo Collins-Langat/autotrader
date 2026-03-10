@@ -29,6 +29,9 @@ paper_portfolio.json
 portfolio.json
 *.json
 
+# Config file contains API keys — never commit
+config.yaml
+
 # Generated PDF reports (temporary output files)
 options_report_*.pdf
 

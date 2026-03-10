@@ -1,6 +1,18 @@
 """
-Market Data Module — Fetches live/historical data using yfinance.
-Provides: underlying price, options chain, historical volatility, IV rank.
+Market Data Module
+==================
+Fetches live/historical data with a two-tier data strategy:
+
+  Tier 1 (preferred) — Tradier API
+      Real implied volatility, real greeks, real-time quotes.
+      Activated by setting tradier.enabled=true in config.yaml.
+
+  Tier 2 (fallback) — yfinance
+      Free, no API key required.  Used automatically when Tradier
+      is not configured or a Tradier request fails.
+
+Public API is unchanged — all callers (decision_engine, backtester,
+long_evaluator, stock_screener) work without modification.
 """
 
 import warnings
@@ -13,29 +25,59 @@ import yfinance as yf
 
 warnings.filterwarnings('ignore')
 
+# ── Tradier integration (optional) ────────────────────────────────────────────
+try:
+    from src.tradier import get_client as _get_tradier, is_tradier_enabled
+    _TRADIER_AVAILABLE = True
+except ImportError:
+    _TRADIER_AVAILABLE = False
+    def is_tradier_enabled() -> bool:
+        return False
+
 
 def get_underlying_data(ticker: str) -> dict:
     """
     Fetch current underlying data for a ticker.
     Returns price, volume, 52-week range, and basic info.
+
+    Price source: Tradier (real-time) if enabled, else yfinance.
+    Fundamental info (sector, market_cap) always from yfinance.
     """
+    # ── Fundamentals from yfinance (always) ───────────────────────────────────
     stock = yf.Ticker(ticker)
-    info = stock.info
-    hist = stock.history(period="1d")
+    info  = stock.info
+    hist  = stock.history(period="1d")
 
     if hist.empty:
         raise ValueError(f"No data found for ticker: {ticker}")
 
-    current_price = hist['Close'].iloc[-1]
+    yf_price = float(hist['Close'].iloc[-1])
+    yf_vol   = int(hist['Volume'].iloc[-1]) if 'Volume' in hist.columns else 0
+
+    # ── Price override from Tradier (real-time) ───────────────────────────────
+    current_price = yf_price
+    volume        = yf_vol
+    data_source   = 'yfinance'
+
+    if _TRADIER_AVAILABLE and is_tradier_enabled():
+        try:
+            q = _get_tradier().get_quote(ticker)
+            if q.get('price', 0) > 0:
+                current_price = q['price']
+                volume        = q.get('volume', yf_vol)
+                data_source   = 'tradier'
+        except Exception:
+            pass  # silent fallback to yfinance
 
     return {
-        'ticker': ticker,
-        'price': round(current_price, 2),
-        'volume': int(hist['Volume'].iloc[-1]) if 'Volume' in hist.columns else 0,
-        'market_cap': info.get('marketCap', None),
-        'sector': info.get('sector', 'Unknown'),
-        'industry': info.get('industry', 'Unknown'),
-        'timestamp': datetime.now().isoformat(),
+        'ticker':      ticker,
+        'price':       round(current_price, 2),
+        'volume':      volume,
+        'market_cap':  info.get('marketCap', None),
+        'sector':      info.get('sector', 'Unknown'),
+        'industry':    info.get('industry', 'Unknown'),
+        'timestamp':   datetime.now().isoformat(),
+        'data_source': data_source,
     }
 
 
@@ -79,23 +121,37 @@ def get_iv_rank(ticker: str, current_iv: float) -> dict:
     """
     Calculate IV rank and IV percentile.
 
-    Two methods depending on ticker type:
+    When Tradier is enabled, the current_iv anchor is replaced with
+    Tradier's real ATM mid_iv — significantly more accurate than
+    yfinance's reverse-engineered estimate.
+
+    Two rank methods depending on ticker type:
 
     A. Broad market ETFs (SPY, QQQ, IWM, etc.):
        Uses VIX 52-week history with 5th/95th percentile winsorization.
-       VIX is the authoritative implied volatility measure for these tickers.
-       The April 2025 spike to VIX=52 is excluded as a tail event.
 
     B. Individual stocks:
        Uses HV+VRP scaling with 10th/90th percentile winsorization.
-       Scales HV history to IV-equivalent units via current IV/HV ratio.
-       Extreme crash events (which blow out min/max) are trimmed at 10/90.
-
-    Production upgrade: replace B with Tradier/Polygon historical IV feed.
+       When Tradier is enabled, current_iv is the real ATM IV.
     """
+    # ── Upgrade current_iv anchor with Tradier real IV if available ───────────
+    iv_source = 'estimated'
+    if _TRADIER_AVAILABLE and is_tradier_enabled():
+        try:
+            real_iv = _get_tradier().get_atm_iv(ticker, target_dte=45)
+            if real_iv and real_iv > 0:
+                current_iv = real_iv
+                iv_source  = 'tradier'
+        except Exception:
+            pass  # keep the caller-supplied estimate
+
     if ticker.upper() in _VIX_LINKED_TICKERS:
-        return _iv_rank_via_vix(current_iv)
-    return _iv_rank_via_hv_vrp(ticker, current_iv)
+        result = _iv_rank_via_vix(current_iv)
+    else:
+        result = _iv_rank_via_hv_vrp(ticker, current_iv)
+
+    result['iv_source'] = iv_source
+    return result
 
 
 def _iv_rank_via_vix(current_iv: float) -> dict:
@@ -200,14 +256,32 @@ def get_options_chain(
     apply_liquidity_filter: bool = True,
 ) -> Optional[pd.DataFrame]:
     """
-    Fetch an options chain from yfinance.
+    Fetch an options chain with real greeks and IV.
+
+    Data source priority:
+      1. Tradier  — real IV (mid_iv), real greeks (delta/gamma/theta/vega)
+      2. yfinance — fallback, IV is estimated by Yahoo (less accurate)
 
     If `expiry` is given (YYYY-MM-DD string), that exact expiration is fetched.
-    This is used by the paper trader to re-price positions at their original expiry.
-
     Otherwise, the expiration closest to `target_dte` days is selected.
     Returns a DataFrame with calls and puts, enriched with DTE and mid price.
     """
+    # ── Tier 1: Tradier ───────────────────────────────────────────────────────
+    if _TRADIER_AVAILABLE and is_tradier_enabled():
+        try:
+            chain = _get_tradier().get_options_chain_near_dte(
+                symbol=ticker,
+                target_dte=target_dte,
+                apply_liquidity_filter=apply_liquidity_filter,
+                expiry=expiry,
+            )
+            if chain is not None and not chain.empty:
+                chain['data_source'] = 'tradier'
+                return chain
+        except Exception:
+            pass  # fall through to yfinance
+
+    # ── Tier 2: yfinance fallback ─────────────────────────────────────────────
     stock = yf.Ticker(ticker)
     expirations = stock.options
 
@@ -293,6 +367,7 @@ def get_options_chain(
         if calls_ok and puts_ok:
             chain_df = filtered
 
+    chain_df['data_source'] = 'yfinance'
     return chain_df
 
 
