@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+
+# IDE / editor
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Claude Code internal files
+.claude/
+
+# Personal / runtime data
+paper_portfolio.json
+portfolio.json
+*.json
+
+# Generated PDF reports (temporary output files)
+options_report_*.pdf
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

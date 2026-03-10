@@ -1,0 +1,76 @@
+# Entry Rules — When to Open a Position
+# Source: TastyTrade Research, Natenberg, Sinclair
+
+rules:
+
+  - id: EN-001
+    name: iv_rank_threshold
+    description: Prefer entering when IV rank is elevated
+    thresholds:
+      undefined_risk_strategies:
+        minimum: 50
+        preferred: 65
+      defined_risk_strategies:
+        minimum: 30
+        preferred: 50
+    source: natenberg_volatility_pricing, tastytrade_research
+    rationale: >
+      Selling options when IV is high relative to its historical range means you are
+      collecting more premium than average. Natenberg: you want to sell volatility when
+      it is expensive (high IV) and buy when it is cheap (low IV).
+
+  - id: EN-002
+    name: dte_selection
+    description: Enter positions at 45 DTE
+    target_dte: 45
+    acceptable_range: [30, 60]
+    source: tastytrade_research
+    rationale: >
+      45 DTE strikes the optimal balance between theta decay rate and time for the trade
+      to work. Inside 30 DTE, gamma risk is too high. Beyond 60 DTE, theta decay is
+      too slow to be capital-efficient. TastyTrade backtesting confirms 45 DTE as optimal.
+
+  - id: EN-003
+    name: delta_selection
+    description: Sell at the 16-delta strike for standard premium collection
+    standard_delta: 0.16
+    aggressive_delta: 0.30
+    conservative_delta: 0.10
+    source: tastytrade_research
+    rationale: >
+      The 16-delta option corresponds to approximately 1 standard deviation move.
+      Statistically, a 1-SD move occurs ~16% of the time. This gives an ~84% probability
+      of profit. Higher deltas collect more credit but have lower POP.
+
+  - id: EN-004
+    name: min_credit
+    description: Ensure minimum credit makes the trade worthwhile
+    rules:
+      - "Credit >= $1.00 for strangles (both legs combined)"
+      - "Credit >= 1/3 of wing width for iron condors"
+      - "Credit >= $0.50 for single-leg puts/calls"
+    source: tastytrade_research
+    rationale: >
+      Below these thresholds, the edge is too thin after commissions and slippage.
+      The risk/reward ratio becomes unfavorable.
+
+  - id: EN-005
+    name: underlying_selection_criteria
+    description: Quality filters for underlying selection
+    criteria:
+      - "IV rank > threshold for strategy type"
+      - "Price > $15 (avoid penny stocks)"
+      - "Average daily volume > 500,000 shares"
+      - "No binary events (earnings, FDA decisions) within DTE window"
+      - "Listed options with monthlies available"
+    source: tastytrade_research, mcmillan
+
+  - id: EN-006
+    name: portfolio_check_before_entry
+    description: Run portfolio-level checks before opening any new position
+    checks:
+      - "Buying power used < 50% after trade"
+      - "No existing position in this underlying"
+      - "Portfolio delta within acceptable range"
+      - "Max 3 positions in same sector"
+    source: tastytrade_research

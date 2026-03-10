@@ -1,0 +1,45 @@
+# High IV Environment Playbook
+# Triggered when: VIX > 25 OR average IV rank across watchlist > 60
+
+regime: high_iv
+trigger_conditions:
+  vix_above: 25
+  avg_iv_rank_above: 60
+
+description: >
+  High IV environments mean options are expensive relative to their historical pricing.
+  This is the ideal environment for premium sellers. Implied volatility tends to
+  mean-revert — it spikes and then falls. Selling in high IV captures the premium
+  AND benefits from IV crush (vega gains as IV falls back to normal).
+
+preferred_strategies:
+  - name: short_strangle
+    reason: "Maximum premium collection. High IV means wide strangles with significant credit."
+  - name: iron_condor
+    reason: "Defined risk version — good when VIX is extreme and tail risk is real"
+  - name: short_put
+    reason: "Bullish-leaning premium collection. High premium + attractive entry on quality names."
+
+avoid_strategies:
+  - name: debit_spreads
+    reason: "Buying options when IV is high means you overpay for the long leg"
+  - name: long_calls_or_puts
+    reason: "IV crush will destroy the value of long options even if direction is right"
+  - name: calendar_spreads
+    reason: "Complex in high-vol environments. Front-month IV can collapse unevenly."
+
+sizing_adjustments:
+  - "Can size slightly larger due to higher premium providing more cushion"
+  - "But increase in volatility = larger potential moves. Don't get overconfident."
+  - "Maximum position size remains 5% of portfolio per trade"
+
+management_adjustments:
+  - "Be quicker to take profit — IV crush can make 50% profit target happen fast"
+  - "Wider strikes are acceptable given higher premiums"
+  - "Consider shorter DTE (30 days) to capitalize on imminent IV crush"
+
+key_insights:
+  - "Natenberg: When IV is high, options are expensive. You want to be a net seller."
+  - "Sinclair: Mean reversion of volatility is one of the most reliable phenomena in finance."
+  - "VIX > 30 is a 'fear index' reading — often marks near-term market bottoms. Premium selling near market extremes has historically been very profitable."
+  - "Be careful of 'volatility traps' — sometimes high IV is justified by real fundamental risk (e.g., 2008, COVID). Use defined-risk strategies when macro is genuinely uncertain."

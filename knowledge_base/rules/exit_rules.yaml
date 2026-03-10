@@ -1,0 +1,73 @@
+# Exit Rules — When to Close or Adjust a Position
+# Source: TastyTrade Research, Natenberg, Passarelli
+
+rules:
+
+  - id: EX-001
+    name: profit_target
+    description: Close positions at 50% of max profit
+    target_pct: 0.50
+    source: tastytrade_research, sosnoff
+    rationale: >
+      TastyTrade research shows that closing at 50% profit maximizes the win rate over
+      time while reducing time in trade (reducing gamma exposure). Holding for the full
+      profit adds minimal additional gain while significantly increasing risk of reversal.
+      The data: closing at 50% vs. expiration increases win rate from ~65% to ~80%.
+
+  - id: EX-002
+    name: stop_loss_undefined_risk
+    description: Close undefined-risk positions at 2x credit received
+    trigger: loss >= credit_received * 2.0
+    action: close_entire_position
+    source: tastytrade_research
+    rationale: >
+      The maximum loss on a well-managed short strangle should be 2x credit.
+      This keeps the loss manageable and preserves capital for future trades.
+
+  - id: EX-003
+    name: dte_exit
+    description: Exit or roll all positions at 21 DTE
+    trigger_dte: 21
+    actions:
+      - "Close position if profitable"
+      - "Roll to next monthly expiration (45 DTE from now) if at a loss"
+    source: tastytrade_research
+    rationale: >
+      Gamma risk spikes below 21 DTE. The remaining theta is not worth the gamma exposure.
+
+  - id: EX-004
+    name: roll_rules
+    description: Rules for rolling positions
+    rules:
+      - name: roll_for_credit_only
+        rule: "Only roll a position if you can collect a net credit"
+        rationale: "Rolling for a debit increases your total risk with no benefit"
+      - name: roll_out_not_in
+        rule: "Roll to further expiration (out in time), never closer"
+        rationale: "Rolling in time increases gamma risk"
+      - name: roll_tested_side
+        rule: "When one side is tested, roll that side further OTM (if credit available)"
+        rationale: "Reduces directional risk by getting further from the money"
+      - name: max_rolls
+        rule: "Maximum 2 rolls per position before closing"
+        rationale: "After 2 rolls, the position is likely a loser — take the loss and move on"
+
+  - id: EX-005
+    name: early_take_profit
+    description: Consider closing early if 50% profit reached before 21 DTE
+    rule: if profit >= 50% AND dte > 21, close position
+    source: tastytrade_research
+    rationale: >
+      No reason to hold a position that has achieved its target. Free up buying power
+      for the next opportunity. 'Let winners run' does not apply to short premium strategies.
+
+  - id: EX-006
+    name: volatility_spike_response
+    description: Respond to sudden IV spikes
+    trigger: iv_current > iv_entry * 1.5
+    action: evaluate_position
+    options:
+      - "Close if loss exceeds 1.5x credit"
+      - "Hold if within stop loss and still within rules"
+      - "Add hedge if position is large relative to portfolio"
+    source: natenberg, sinclair

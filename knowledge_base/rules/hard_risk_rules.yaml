@@ -1,0 +1,112 @@
+# Hard Risk Rules — NEVER VIOLATED
+# Source: McMillan (Options as a Strategic Investment), Taleb (Dynamic Hedging), TastyTrade Research
+# Priority 1 rules. The decision engine will REFUSE to open/hold a trade that violates these.
+
+rules:
+
+  - id: HR-001
+    name: earnings_blackout
+    description: Never hold short premium positions through an earnings event
+    rule: Close or avoid opening any short options position if earnings are within 7 days of expiration
+    source: tastytrade_research, common_practice
+    rationale: >
+      Earnings cause binary moves that can wipe out months of premium income in one day.
+      The implied move priced into options pre-earnings does not consistently compensate for
+      the realized move risk. Exception: defined-risk strategies where max loss is acceptable.
+
+  - id: HR-002
+    name: max_position_risk
+    description: Never risk more than 2% of portfolio on a single trade
+    rule: max_loss_per_trade <= portfolio_value * 0.02
+    source: standard_risk_management, mcmillan
+    rationale: >
+      Kelly criterion and practical risk management both support limiting single-trade exposure.
+      A 2% risk per trade means 50 consecutive losers before account destruction — provides
+      statistical durability through drawdown periods.
+
+  - id: HR-003
+    name: undefined_risk_stop_loss
+    description: Close undefined-risk positions at 2x the credit received
+    rule: if loss >= credit_received * 2, close position
+    source: tastytrade_research
+    rationale: >
+      Short strangles and short puts have undefined downside. Without a hard stop, a single
+      trade can exceed all prior gains. The 2x rule caps the maximum loss at a known multiple
+      of the premium collected.
+
+  - id: HR-004
+    name: dte_forced_exit
+    description: Exit all short options by 21 DTE regardless of P&L
+    rule: if dte <= 21, close or roll position
+    source: tastytrade_research
+    rationale: >
+      Gamma risk accelerates dramatically inside 21 days to expiration. A small adverse
+      move in the underlying can cause large P&L swings. The theta earned in the final
+      21 days does not compensate for the increased gamma exposure.
+
+  - id: HR-005
+    name: buying_power_cap
+    description: Never use more than 50% of portfolio buying power
+    rule: total_buying_power_used <= portfolio_value * 0.50
+    source: tastytrade_research, sosnoff
+    rationale: >
+      Keeping 50% of buying power free allows you to manage positions (roll, adjust) without
+      forced liquidation at the worst time. It also acts as a buffer for margin calls.
+
+  - id: HR-006
+    name: single_underlying_limit
+    description: Only one active position per underlying at a time
+    rule: count_open_positions_per_underlying <= 1
+    source: tastytrade_research
+    rationale: >
+      Multiple positions in the same underlying compound the risk without diversifying it.
+      If the underlying moves against you, all positions suffer simultaneously.
+
+  - id: HR-007
+    name: liquidity_minimum
+    description: Only trade options with adequate liquidity
+    rule: >
+      bid_ask_spread / mid_price <= 0.15 AND
+      open_interest >= 100 AND
+      daily_volume >= 10
+    source: natenberg, passarelli
+    rationale: >
+      Wide bid-ask spreads destroy the theoretical edge of options strategies. The
+      fill price on illiquid options can be 20-30% worse than the theoretical value.
+
+  - id: HR-008
+    name: no_naked_calls
+    description: Never sell naked (uncovered) calls
+    rule: all short calls must be covered (by shares, long call, or defined spread)
+    source: mcmillan, standard_risk_management
+    rationale: >
+      A short naked call has theoretically unlimited loss potential. Even with stops,
+      gap risk (overnight moves) can result in losses far exceeding stop levels.
+      This is the one trade where the math argues clearly against it.
+
+  - id: HR-009
+    name: correlation_limit
+    description: Limit number of correlated positions
+    rule: max_correlated_positions_same_sector <= 3
+    source: portfolio_theory
+    rationale: >
+      Holding 5 short strangles in tech stocks acts like one enormous tech position.
+      Diversify across uncorrelated underlyings and sectors.
+
+  - id: HR-010
+    name: macro_event_blackout
+    description: No new positions within 2 days of a high-impact macro event
+    rule: >
+      Do not open new short premium positions if a high-impact scheduled event
+      (FOMC rate decision, CPI release, NFP jobs report) occurs within 2 calendar
+      days of today, or falls within the 45-day holding window.
+    source: tastytrade_research, common_practice
+    rationale: >
+      Scheduled macro events (FOMC, CPI, NFP) cause sudden large moves in equities
+      and volatility. Opening a new position immediately before such an event means
+      the position has no time to accrue theta before a potential adverse move.
+      Unlike earnings, IV does not fully collapse after the event — the VRP can
+      persist — but the directional gap risk in the first 1-2 days is too high
+      relative to the premium collected. The 2-day window is a practical compromise:
+      wide enough to avoid event risk, narrow enough not to block trading excessively.
+      Calendar maintained in knowledge_base/macro_calendar.yaml. Update quarterly.

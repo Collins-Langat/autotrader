@@ -1,0 +1,40 @@
+# Low IV Environment Playbook
+# Triggered when: VIX < 15 OR average IV rank across watchlist < 30
+
+regime: low_iv
+trigger_conditions:
+  vix_below: 15
+  avg_iv_rank_below: 30
+
+description: >
+  Low IV environments mean options are cheap. Selling premium in low IV means
+  collecting less credit while still taking on the same underlying risk.
+  The edge in premium selling is reduced. Shift to debit strategies or reduce size.
+
+preferred_strategies:
+  - name: debit_spreads
+    reason: "Buy cheap options when IV is low. Long vertical spreads are attractive."
+  - name: calendar_spread
+    reason: "Long vega — benefits if IV increases from current low levels. Buy back month, sell front."
+  - name: diagonal_spread
+    reason: "LEAPS + short-term call sales. Cheap long option + ongoing income."
+  - name: small_defined_risk_short_premium
+    reason: "Can still sell premium on high-IV-rank individual names even if overall market IV is low"
+
+avoid_strategies:
+  - name: short_strangle
+    reason: "Too little credit for the risk taken. The risk/reward is poor."
+  - name: naked_puts_large_size
+    reason: "Low premium doesn't justify the capital commitment"
+
+sizing_adjustments:
+  - "Reduce overall portfolio premium selling activity"
+  - "Shift toward debit strategies or reduce position count"
+  - "Wait for better opportunities — cash is a position"
+
+key_insights:
+  - "Natenberg: When IV is low, options are cheap. You want to be a net buyer."
+  - "Sinclair: Low volatility often precedes high volatility. The transition can be violent."
+  - "TastyTrade: Low IV rank periods are when traders get complacent and overtrade. The discipline is to NOT trade."
+  - "VIX < 12 historically precedes volatility spikes. Use this as an alert to reduce short premium exposure."
+  - "Cash is a valid position. Missing low-quality trades preserves capital for high-quality opportunities."

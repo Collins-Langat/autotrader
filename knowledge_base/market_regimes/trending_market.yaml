@@ -1,0 +1,37 @@
+# Trending Market Playbook
+# Triggered when: underlying shows strong directional trend (ADX > 25, or price > 20-day MA by significant margin)
+
+regime: trending_market
+trigger_conditions:
+  adx_above: 25
+  price_above_20ma_by_pct: 0.05
+
+description: >
+  In a trending market, neutral strategies like strangles and condors are risky because
+  the underlying may blow through your strikes. Shift toward directional strategies
+  or stay on the side of the trend with put-credit spreads (bull trend) or call spreads (bear trend).
+
+preferred_strategies:
+  - name: bull_put_spread
+    reason: "In uptrend: sell put spread below current price. Collect credit, stay on trend side."
+  - name: short_put
+    reason: "In uptrend: sell puts below support. Get paid to potentially buy a stock you like at a discount."
+  - name: debit_call_spread
+    reason: "In strong uptrend: buy cheap call spread. Defined risk directional bet."
+
+avoid_strategies:
+  - name: short_strangle
+    reason: "Neutral strategy in a trending market. The untested side of the trend will be hit."
+  - name: iron_condor
+    reason: "Same problem — the trending side will breach the short strike."
+
+adjustment_rules:
+  - "Skew the strangle: sell closer-to-money puts than calls in uptrend (or vice versa)"
+  - "Use directional spreads instead of neutral spreads"
+  - "If holding a neutral position, add directional hedge to offset delta"
+
+key_insights:
+  - "Augen (Trading Options at Expiration): Momentum is real and options strategies must account for it."
+  - "The trend is your friend — even in options. Don't fight the tape with neutral premium selling."
+  - "A put spread below a rising stock is a very high-probability trade with meaningful credit."
+  - "Passarelli: Monitor delta of your portfolio. If you are short 100 delta in a bull trend, you need to adjust."

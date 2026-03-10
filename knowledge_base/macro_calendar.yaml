@@ -1,0 +1,350 @@
+# Macro Event Calendar
+# High-impact scheduled events that the decision engine uses to block new positions.
+# Update this file quarterly as new dates are released.
+#
+# Sources:
+#   FOMC:  federalreserve.gov (announced ~1 year in advance)
+#   CPI:   bls.gov/schedule  (announced ~1 year in advance)
+#   NFP:   bls.gov/schedule  (first Friday of each month, sometimes shifted for holidays)
+#
+# Decision engine rule HR-010:
+#   Do not open new short premium positions within 2 trading days before
+#   any high-impact event that falls within the position's 45-day holding window.
+#
+# Impact levels:
+#   high   - hard block (same as earnings)
+#   medium - warning only, no block
+
+events:
+
+  # ──────────────────────────────────────────────────────────
+  # FOMC Rate Decisions (announcement day = second day of meeting)
+  # ──────────────────────────────────────────────────────────
+
+  - date: "2025-01-29"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Jan 2025)"
+    impact: high
+
+  - date: "2025-03-19"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Mar 2025)"
+    impact: high
+
+  - date: "2025-05-07"
+    type: "FOMC"
+    description: "FOMC Rate Decision (May 2025)"
+    impact: high
+
+  - date: "2025-06-18"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Jun 2025)"
+    impact: high
+
+  - date: "2025-07-30"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Jul 2025)"
+    impact: high
+
+  - date: "2025-09-17"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Sep 2025)"
+    impact: high
+
+  - date: "2025-10-29"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Oct 2025)"
+    impact: high
+
+  - date: "2025-12-10"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Dec 2025)"
+    impact: high
+
+  - date: "2026-01-28"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Jan 2026)"
+    impact: high
+
+  - date: "2026-03-18"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Mar 2026)"
+    impact: high
+
+  - date: "2026-04-29"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Apr 2026)"
+    impact: high
+
+  - date: "2026-06-17"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Jun 2026)"
+    impact: high
+
+  - date: "2026-07-29"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Jul 2026)"
+    impact: high
+
+  - date: "2026-09-16"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Sep 2026)"
+    impact: high
+
+  - date: "2026-10-28"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Oct 2026)"
+    impact: high
+
+  - date: "2026-12-09"
+    type: "FOMC"
+    description: "FOMC Rate Decision (Dec 2026)"
+    impact: high
+
+  # ──────────────────────────────────────────────────────────
+  # CPI (Consumer Price Index) — BLS release dates
+  # ──────────────────────────────────────────────────────────
+
+  - date: "2025-01-15"
+    type: "CPI"
+    description: "CPI Release (Dec 2024 data)"
+    impact: high
+
+  - date: "2025-02-12"
+    type: "CPI"
+    description: "CPI Release (Jan 2025 data)"
+    impact: high
+
+  - date: "2025-03-12"
+    type: "CPI"
+    description: "CPI Release (Feb 2025 data)"
+    impact: high
+
+  - date: "2025-04-10"
+    type: "CPI"
+    description: "CPI Release (Mar 2025 data)"
+    impact: high
+
+  - date: "2025-05-13"
+    type: "CPI"
+    description: "CPI Release (Apr 2025 data)"
+    impact: high
+
+  - date: "2025-06-11"
+    type: "CPI"
+    description: "CPI Release (May 2025 data)"
+    impact: high
+
+  - date: "2025-07-15"
+    type: "CPI"
+    description: "CPI Release (Jun 2025 data)"
+    impact: high
+
+  - date: "2025-08-12"
+    type: "CPI"
+    description: "CPI Release (Jul 2025 data)"
+    impact: high
+
+  - date: "2025-09-10"
+    type: "CPI"
+    description: "CPI Release (Aug 2025 data)"
+    impact: high
+
+  - date: "2025-10-14"
+    type: "CPI"
+    description: "CPI Release (Sep 2025 data)"
+    impact: high
+
+  - date: "2025-11-12"
+    type: "CPI"
+    description: "CPI Release (Oct 2025 data)"
+    impact: high
+
+  - date: "2025-12-10"
+    type: "CPI"
+    description: "CPI Release (Nov 2025 data)"
+    impact: high
+
+  - date: "2026-01-14"
+    type: "CPI"
+    description: "CPI Release (Dec 2025 data)"
+    impact: high
+
+  - date: "2026-02-11"
+    type: "CPI"
+    description: "CPI Release (Jan 2026 data)"
+    impact: high
+
+  - date: "2026-03-11"
+    type: "CPI"
+    description: "CPI Release (Feb 2026 data)"
+    impact: high
+
+  - date: "2026-04-09"
+    type: "CPI"
+    description: "CPI Release (Mar 2026 data)"
+    impact: high
+
+  - date: "2026-05-13"
+    type: "CPI"
+    description: "CPI Release (Apr 2026 data)"
+    impact: high
+
+  - date: "2026-06-10"
+    type: "CPI"
+    description: "CPI Release (May 2026 data)"
+    impact: high
+
+  - date: "2026-07-14"
+    type: "CPI"
+    description: "CPI Release (Jun 2026 data)"
+    impact: high
+
+  - date: "2026-08-12"
+    type: "CPI"
+    description: "CPI Release (Jul 2026 data)"
+    impact: high
+
+  - date: "2026-09-09"
+    type: "CPI"
+    description: "CPI Release (Aug 2026 data)"
+    impact: high
+
+  - date: "2026-10-14"
+    type: "CPI"
+    description: "CPI Release (Sep 2026 data)"
+    impact: high
+
+  - date: "2026-11-12"
+    type: "CPI"
+    description: "CPI Release (Oct 2026 data)"
+    impact: high
+
+  - date: "2026-12-09"
+    type: "CPI"
+    description: "CPI Release (Nov 2026 data)"
+    impact: high
+
+  # ──────────────────────────────────────────────────────────
+  # NFP (Non-Farm Payrolls) — first Friday of each month
+  # ──────────────────────────────────────────────────────────
+
+  - date: "2025-01-10"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Dec 2024 data)"
+    impact: high
+
+  - date: "2025-02-07"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Jan 2025 data)"
+    impact: high
+
+  - date: "2025-03-07"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Feb 2025 data)"
+    impact: high
+
+  - date: "2025-04-04"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Mar 2025 data)"
+    impact: high
+
+  - date: "2025-05-02"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Apr 2025 data)"
+    impact: high
+
+  - date: "2025-06-06"
+    type: "NFP"
+    description: "Non-Farm Payrolls (May 2025 data)"
+    impact: high
+
+  - date: "2025-07-03"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Jun 2025 data)"
+    impact: high
+
+  - date: "2025-08-01"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Jul 2025 data)"
+    impact: high
+
+  - date: "2025-09-05"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Aug 2025 data)"
+    impact: high
+
+  - date: "2025-10-03"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Sep 2025 data)"
+    impact: high
+
+  - date: "2025-11-07"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Oct 2025 data)"
+    impact: high
+
+  - date: "2025-12-05"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Nov 2025 data)"
+    impact: high
+
+  - date: "2026-01-09"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Dec 2025 data)"
+    impact: high
+
+  - date: "2026-02-06"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Jan 2026 data)"
+    impact: high
+
+  - date: "2026-03-06"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Feb 2026 data)"
+    impact: high
+
+  - date: "2026-04-03"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Mar 2026 data)"
+    impact: high
+
+  - date: "2026-05-08"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Apr 2026 data)"
+    impact: high
+
+  - date: "2026-06-05"
+    type: "NFP"
+    description: "Non-Farm Payrolls (May 2026 data)"
+    impact: high
+
+  - date: "2026-07-10"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Jun 2026 data)"
+    impact: high
+
+  - date: "2026-08-07"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Jul 2026 data)"
+    impact: high
+
+  - date: "2026-09-04"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Aug 2026 data)"
+    impact: high
+
+  - date: "2026-10-02"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Sep 2026 data)"
+    impact: high
+
+  - date: "2026-11-06"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Oct 2026 data)"
+    impact: high
+
+  - date: "2026-12-04"
+    type: "NFP"
+    description: "Non-Farm Payrolls (Nov 2026 data)"
+    impact: high
